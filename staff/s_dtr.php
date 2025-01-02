@@ -254,25 +254,41 @@ include('./includes/topbar.php');
                         <td>
                             <strong>OL:</strong> <br>
                             <?php echo htmlspecialchars($row['week1_overload']); ?> <br>
-                            <strong>SC/CTO:</strong> <br>
+                            <strong>
+                                <?php 
+                                    echo ($row['designated'] == 'Designated') ? 'SC:' : 'CTO:';
+                                ?>
+                            </strong>
                             <?php echo htmlspecialchars($totalCreditsPerWeek['week1_overload']); ?>
                         </td>
                         <td>
                             <strong>OL:</strong> <br>
                             <?php echo htmlspecialchars($row['week2_overload']); ?> <br>
-                            <strong>SC/CTO:</strong> <br>
+                            <strong>
+                                <?php 
+                                    echo ($row['designated'] == 'Designated') ? 'SC:' : 'CTO:';
+                                ?>
+                            </strong>
                             <?php echo htmlspecialchars($totalCreditsPerWeek['week2_overload']); ?>
                         </td>
                         <td>
                             <strong>OL:</strong> <br>
                             <?php echo htmlspecialchars($row['week3_overload']); ?> <br>
-                            <strong>SC/CTO:</strong> <br>
+                            <strong>
+                                <?php 
+                                    echo ($row['designated'] == 'Designated') ? 'SC:' : 'CTO:';
+                                ?>
+                            </strong>
                             <?php echo htmlspecialchars($totalCreditsPerWeek['week3_overload']); ?>
                         </td>
                         <td>
                             <strong>OL:</strong> <br>
                             <?php echo htmlspecialchars($row['week4_overload']); ?> <br>
-                            <strong>SC/CTO:</strong> <br>
+                            <strong>
+                                <?php 
+                                    echo ($row['designated'] == 'Designated') ? 'SC:' : 'CTO:';
+                                ?>
+                            </strong>
                             <?php echo htmlspecialchars($totalCreditsPerWeek['week4_overload']); ?>
                         </td>
                         <td>

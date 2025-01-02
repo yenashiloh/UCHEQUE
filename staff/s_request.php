@@ -11,138 +11,147 @@ include('./includes/topbar.php');
     <h3 class="main--title">Request DTR</h3>
     <div class="add">
     <div class="filter">
-            <form method="GET" action="" class="d-flex align-items-center">
-        
-            <select name="academic_year" onchange="this.form.submit()" style="height: 43px; margin-right: 10px; width: 220px;">
+        <form method="GET" action="" class="d-flex align-items-center">
+            <select name="month" onchange="this.form.submit()" style="height: 43px; margin-right: 10px; width: 220px;">
+                <option value="">Select Request Month</option>
+                <?php
+                    $existingMonthsQuery = "SELECT DISTINCT startMonth FROM request WHERE startMonth IS NOT NULL";
+                    $existingMonthsResult = $con->query($existingMonthsQuery);
+                    $existingMonths = [];
+
+                    if ($existingMonthsResult) {
+                        while ($row = $existingMonthsResult->fetch_assoc()) {
+                            $existingMonths[] = $row['startMonth'];
+                        }
+                    }
+
+                    $allMonths = [
+                        'January', 'February', 'March', 'April',
+                        'May', 'June', 'July', 'August',
+                        'September', 'October', 'November', 'December'
+                    ];
+
+                    foreach ($allMonths as $month) {
+                        $selected = (isset($_GET['month']) && $_GET['month'] == $month) ? 'selected' : '';
+                        $displayText = $month . (in_array($month, $existingMonths) ? ' ' : '');
+                        echo "<option value='" . htmlspecialchars($month) . "' $selected>" .
+                            htmlspecialchars($displayText) . "</option>";
+                    }
+                ?>
+            </select>
+
+            <select name="request_year" onchange="this.form.submit()" style="height: 43px; margin-right: 10px; width: 220px;">
                 <option value="" selected>Select Request Year</option>
                 <?php
-                $academicYearQuery = "SELECT requestDate FROM request";
-                $academicYearResult = $con->query($academicYearQuery);
-                while ($academicYear = $academicYearResult->fetch_assoc()):
+                    $requestYearQuery = "SELECT DISTINCT YEAR(requestDate) AS year FROM request WHERE requestDate IS NOT NULL";
+                    $requestYearResult = $con->query($requestYearQuery);
+                    while ($requestYear = $requestYearResult->fetch_assoc()):
+                        $selected = (isset($_GET['request_year']) && $_GET['request_year'] == $requestYear['year']) ? 'selected' : '';
+                        echo "<option value='" . htmlspecialchars($requestYear['year']) . "' {$selected}>" .
+                            htmlspecialchars($requestYear['year']) . "</option>";
+                    endwhile;
                 ?>
-                <option value="<?php echo $academicYear['academic_year_id']; ?>" 
-                    <?php echo (isset($_GET['academic_year']) && $_GET['academic_year'] == $academicYear['academic_year_id']) ? 'selected' : ''; ?>>
-                    <?php echo $academicYear['academic_year']; ?>
-                </option>
-                <?php endwhile; ?>
             </select>
+        </form>
+    </div>
+</div>
 
-            <select name="semester" onchange="this.form.submit()" style="height: 43px; margin-right: 10px; width: 220px;">
-                <option value="" selected>Select Request Month</option>
-                <?php
-                $semesterQuery = "SELECT * FROM request";
-                $semesterResult = $con->query($semesterQuery);
-                while ($semester = $semesterResult->fetch_assoc()):
-                ?>
-                <option value="<?php echo $semester['semester_id']; ?>" 
-                    <?php echo (isset($_GET['semester']) && $_GET['semester'] == $semester['semester_id']) ? 'selected' : ''; ?>>
-                    <?php echo $semester['semester_name']; ?>
-                </option>
-                <?php endwhile; ?>
-            </select>
-            </form>
-        </div>
-    </div>  
 
-    <div class="table-container">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Request Date</th>
-                    <th>Request Type</th>
-                    <th>Name</th> 
-                    <th>Start Month</th>
-                    <th>End Month</th>
-                    <th>Approved Date</th> <!-- Correct column for Approved Date -->
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-
-            <tbody>
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Request Date</th>
+                <th>Request Type</th>
+                <th>Name</th>
+                <th>Start Month</th>
+                <th>End Month</th>
+                <th>Approved Date</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
             <?php
-              
                 $recordsPerPage = 10;
-
                 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-                $offset = ($page - 1) * $recordsPerPage; 
+                $offset = ($page - 1) * $recordsPerPage;
 
-                $totalRecordsQuery = "SELECT COUNT(*) as total FROM request";
+                $monthFilter = isset($_GET['month']) && $_GET['month'] !== '' ? 
+                    "AND startMonth = '" . $con->real_escape_string($_GET['month']) . "'" : '';
+                $yearFilter = isset($_GET['request_year']) && $_GET['request_year'] !== '' ? 
+                    "AND YEAR(requestDate) = " . (int)$_GET['request_year'] : '';
+
+                $totalRecordsQuery = "SELECT COUNT(*) as total FROM request WHERE 1 $monthFilter $yearFilter";
                 $totalRecordsResult = $con->query($totalRecordsQuery);
                 $totalRecords = $totalRecordsResult->fetch_assoc()['total'];
-
                 $totalPages = ceil($totalRecords / $recordsPerPage);
 
                 $query = "SELECT r.requestId, r.requestDate, e.employeeId, e.firstName, e.middleName, e.lastName, 
-                        r.startMonth, r.endMonth, r.status, r.dateApproved, r.requestType
-                        FROM request r
-                        JOIN employee e ON r.userId = e.userId 
-                        ORDER BY r.requestDate DESC
-                        LIMIT $recordsPerPage OFFSET $offset"; 
+                            r.startMonth, r.endMonth, r.status, r.dateApproved, r.requestType
+                          FROM request r
+                          JOIN employee e ON r.userId = e.userId 
+                          WHERE 1 $monthFilter $yearFilter
+                          ORDER BY r.requestDate DESC
+                          LIMIT $recordsPerPage OFFSET $offset";
 
-                $result = $con->query($query); 
-                ?>
+                $result = $con->query($query);
+            ?>
+            <?php
+                if ($result->num_rows > 0) {
+                    while ($row = $result->fetch_assoc()) {
+                        $fullName = htmlspecialchars($row['firstName']) . ' ' . htmlspecialchars($row['middleName']) . ' ' . htmlspecialchars($row['lastName']);
+                        $approveLink = $row['status'] != 'Approved' ? "<a href='#' class='btn btn-link' onclick='approveRequest(" . $row['requestId'] . ")'>Approve</a>" : "";
 
-                <tbody>
-                    <?php
-                    if ($result->num_rows > 0) {
-                        while ($row = $result->fetch_assoc()) {
-                            $fullName = htmlspecialchars($row['firstName']) . ' ' . htmlspecialchars($row['middleName']) . ' ' . htmlspecialchars($row['lastName']);
-                            $approveLink = $row['status'] != 'Approved' ? "<a href='#' class='btn btn-link' onclick='approveRequest(" . $row['requestId'] . ")'>Approve</a>" : "";
-
-                            // Check if dateApproved exists and is valid
-                            if (!empty($row['dateApproved'])) {
-                                $timestamp = strtotime($row['dateApproved']); // Convert to UNIX timestamp
-                                $dateApproved = $timestamp ? date("F j, Y, g:i a", $timestamp) : '--';
-                            } else {
-                                $dateApproved = '--';
-                            }
-
-                            echo "<tr id='request-" . htmlspecialchars($row['requestId']) . "'>
-                                    <td>" . date("F j, Y, g:i a", strtotime($row['requestDate'])) . "</td>
-                                    <td>" . htmlspecialchars($row['requestType']) . "</td> 
-                                    <td>" . $fullName . "</td> 
-                                    <td>" . htmlspecialchars($row['startMonth']) . "</td>
-                                    <td>" . htmlspecialchars($row['endMonth']) . "</td>
-                                    <td>" . htmlspecialchars($dateApproved) . "</td>
-                                    <td>" . htmlspecialchars($row['status']) . "</td>
-                                    <td>" . $approveLink . "</td> 
-                                </tr>";
+                        if (!empty($row['dateApproved'])) {
+                            $timestamp = strtotime($row['dateApproved']); 
+                            $dateApproved = $timestamp ? date("F j, Y, g:i a", $timestamp) : '--';
+                        } else {
+                            $dateApproved = '--';
                         }
-                    } else {
-                        echo "<tr>
-                                <td colspan='8' class='text-center'>No requests found</td> <!-- Ensure the colspan includes all columns -->
+
+                        echo "<tr id='request-" . htmlspecialchars($row['requestId']) . "'>
+                                <td>" . date("F j, Y, g:i a", strtotime($row['requestDate'])) . "</td>
+                                <td>" . htmlspecialchars($row['requestType']) . "</td> 
+                                <td>" . $fullName . "</td> 
+                                <td>" . htmlspecialchars($row['startMonth']) . "</td>
+                                <td>" . htmlspecialchars($row['endMonth']) . "</td>
+                                <td>" . htmlspecialchars($dateApproved) . "</td>
+                                <td>" . htmlspecialchars($row['status']) . "</td>
+                                <td>" . $approveLink . "</td> 
                             </tr>";
                     }
-                    ?>
-                </tbody>
+                } else {
+                    echo "<tr>
+                            <td colspan='8' class='text-center'>No requests found</td>
+                        </tr>";
+                }
+            ?>
+        </tbody>
+    </table>
 
-                </table>
+    <!-- Pagination Controls -->
+    <div class="pagination" id="pagination">
+        <?php
+        if ($totalPages > 1) {
+            echo '<a href="?page=1" class="pagination-button">&laquo;</a>';
+            
+            $prevPage = max(1, $page - 1);
+            echo '<a href="?page=' . $prevPage . '" class="pagination-button">&lsaquo;</a>';
 
-                <!-- Pagination Controls -->
-                <div class="pagination" id="pagination">
-                    <?php
-                    if ($totalPages > 1) {
-                   
-                        echo '<a href="?page=1" class="pagination-button">&laquo;</a>';
-                        
-                        $prevPage = max(1, $page - 1);
-                        echo '<a href="?page=' . $prevPage . '" class="pagination-button">&lsaquo;</a>';
+            for ($i = 1; $i <= $totalPages; $i++) {
+                $activeClass = ($i == $page) ? 'active' : ''; 
+                echo '<a href="?page=' . $i . '" class="pagination-button ' . $activeClass . '">' . $i . '</a>';
+            }
 
-                        // Pagination links
-                        for ($i = 1; $i <= $totalPages; $i++) {
-                            $activeClass = ($i == $page) ? 'active' : ''; 
-                            echo '<a href="?page=' . $i . '" class="pagination-button ' . $activeClass . '">' . $i . '</a>';
-                        }
+            $nextPage = min($totalPages, $page + 1);
+            echo '<a href="?page=' . $nextPage . '" class="pagination-button">&rsaquo;</a>';
 
-                        $nextPage = min($totalPages, $page + 1);
-                        echo '<a href="?page=' . $nextPage . '" class="pagination-button">&rsaquo;</a>';
-
-                        echo '<a href="?page=' . $totalPages . '" class="pagination-button">&raquo;</a>';
-                    }
-                    ?>
-                </div>
-
+            echo '<a href="?page=' . $totalPages . '" class="pagination-button">&raquo;</a>';
+        }
+        ?>
+    </div>
+</div>
 
     </div>
 </div>

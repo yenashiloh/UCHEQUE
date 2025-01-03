@@ -47,27 +47,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $section->addText('Dear Atty. Albina:', ['bold' => true]);
 
     if ($request_type == 'Request for CTO') {
-        $employee_id = $employee_ids[0];  
-        
-        $query = "SELECT employee.firstName, employee.middleName, employee.lastName 
-                  FROM employee 
-                  INNER JOIN employee_role ON employee.userId = employee_role.userId
-                  WHERE employee_role.role_id = 2 AND employee.userId = '$employee_id'";
-        $result = $con->query($query);
-
-        $employeeName = '';
-        if ($result->num_rows > 0) {
-            $row = $result->fetch_assoc();
-            $employeeName = $row['firstName'] . ' ' . $row['middleName'] . ' ' . $row['lastName'];
-        }
-
-        $dateRangeText = !empty($end_month) 
-            ? 'from ' . $starting_month . ' to ' . $end_month 
-            : 'for ' . $starting_month;
-
         $section->addText(
             'With reference to the approved Summary of Honoraria for the ' . $semester_name . ' S.Y. ' . 
-            $academic_year . ' ' . $dateRangeText . ', this is to respectfully request the ' . 
+            $academic_year . ' from ' . $starting_month . ' to ' . $end_month . ', this is to respectfully request the ' . 
             'Compensatory Time-Off (CTO)/Service Credits of the undersigned as shown in the table below:',
             ['size' => 10]
         );
@@ -81,29 +63,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $table->addCell(2000)->addText('Paid Overload', ['bold' => true]);
         $table->addCell(2000)->addText('Number of Hours to Claim for CTO (4.25x18/wks)', ['bold' => true]);
 
-        $itlQuery = "SELECT facultyCredit, allowableUnit, totalOverload 
-                     FROM itl_extracted_data 
-                     WHERE userId = '$employee_id' 
-                     AND semester_id = '$semester_id'
-                     AND academic_year_id = '$academic_year_id'";
-        $itlResult = $con->query($itlQuery);
-
-        $facultyCredit = $allowableUnit = $totalOverload = '';
-        if ($itlResult->num_rows > 0) {
-            $itlRow = $itlResult->fetch_assoc();
-            $facultyCredit = $itlRow['facultyCredit'];
-            $allowableUnit = $itlRow['allowableUnit'];
-            $totalOverload = $itlRow['totalOverload'];
+        foreach ($employee_ids as $employee_id) {
+            $query = "SELECT employee.firstName, employee.middleName, employee.lastName 
+                      FROM employee 
+                      INNER JOIN employee_role ON employee.userId = employee_role.userId
+                      WHERE employee_role.role_id = 2 AND employee.userId = ?";
+            $stmt = $con->prepare($query);
+            $stmt->bind_param("s", $employee_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+        
+            if ($result->num_rows > 0) {
+                $row = $result->fetch_assoc();
+                $employeeName = $row['lastName'] . ', ' . $row['firstName'] . ' ' . $row['middleName'];
+        
+                $itlQuery = "SELECT facultyCredit, allowableUnit, totalOverload 
+                             FROM itl_extracted_data 
+                             WHERE userId = ?";
+                $itlStmt = $con->prepare($itlQuery);
+                $itlStmt->bind_param("s", $employee_id);
+                $itlStmt->execute();
+                $itlResult = $itlStmt->get_result();
+        
+                $facultyCredit = $allowableUnit = $totalOverload = '';
+                if ($itlResult->num_rows > 0) {
+                    $itlRow = $itlResult->fetch_assoc();
+                    $facultyCredit = $itlRow['facultyCredit'];
+                    $allowableUnit = $itlRow['allowableUnit'];
+                    $totalOverload = $itlRow['totalOverload'];
+                }
+        
+                $table->addRow();
+                $table->addCell(2000)->addText($employeeName, ['bold' => true]);
+                $table->addCell(2000)->addText('');
+                $table->addCell(2000)->addText('');
+                $table->addCell(2000)->addText($totalOverload ? $totalOverload . ' hrs' : '');
+                $table->addCell(2000)->addText('');
+                $table->addCell(2000)->addText('');
+            }
         }
-
-        $table->addRow();
-        $table->addCell(2000)->addText($employeeName, ['bold' => true]);
-        $table->addCell(2000)->addText('');
-        $table->addCell(2000)->addText('');
-        $table->addCell(2000)->addText($totalOverload);
-        $table->addCell(2000)->addText('');
-        $table->addCell(2000)->addText('');
-
+        
     } elseif ($request_type == 'Request Letter Overload') {
         $section->addText(
             'This letter is to request your good office to allow the following faculty members under the ' . 
@@ -130,54 +129,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $query = "SELECT employee.firstName, employee.middleName, employee.lastName 
                       FROM employee 
                       INNER JOIN employee_role ON employee.userId = employee_role.userId
-                      WHERE employee_role.role_id = 2 AND employee.userId = '$employee_id'";
-            $result = $con->query($query);
+                      WHERE employee_role.role_id = 2 AND employee.userId = ?";
+            $stmt = $con->prepare($query);
+            $stmt->bind_param("s", $employee_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
 
-            $employeeName = '';
             if ($result->num_rows > 0) {
                 $row = $result->fetch_assoc();
-                $employeeName = $row['firstName'] . ' ' . $row['middleName'] . ' ' . $row['lastName'];
+                $employeeName = $row['lastName'] . ', ' . $row['firstName'] . ' ' . $row['middleName'];
+
+                $itlQuery = "SELECT facultyCredit, allowableUnit, totalOverload 
+                            FROM itl_extracted_data 
+                            WHERE userId = ?";
+                $itlStmt = $con->prepare($itlQuery);
+                $itlStmt->bind_param("s", $employee_id);
+                $itlStmt->execute();
+                $itlResult = $itlStmt->get_result();
+
+                if ($itlResult->num_rows > 0) {
+                    $itlRow = $itlResult->fetch_assoc();
+                    $table->addRow();
+                    $table->addCell(2000)->addText($employeeName, ['bold' => true]);
+                    $table->addCell(2000)->addText('');
+                    $table->addCell(2000)->addText('');
+                    $table->addCell(2000)->addText($itlRow['facultyCredit'] . ' hrs');
+                    $table->addCell(2000)->addText($itlRow['allowableUnit']);
+                    $table->addCell(2000)->addText($itlRow['totalOverload'] . ' hrs');
+                }
             }
-
-            $itlQuery = "SELECT facultyCredit, allowableUnit, totalOverload 
-                         FROM itl_extracted_data 
-                         WHERE userId = '$employee_id'
-                         AND semester_id = '$semester_id'
-                         AND academic_year_id = '$academic_year_id'";
-            $itlResult = $con->query($itlQuery);
-
-            $facultyCredit = $allowableUnit = $totalOverload = '';
-            if ($itlResult->num_rows > 0) {
-                $itlRow = $itlResult->fetch_assoc();
-                $facultyCredit = $itlRow['facultyCredit'];
-                $allowableUnit = $itlRow['allowableUnit'];
-                $totalOverload = $itlRow['totalOverload'];
-            }
-
-            $table->addRow();
-            $table->addCell(2000)->addText($employeeName, ['bold' => true]);
-            $table->addCell(2000)->addText(''); 
-            $table->addCell(2000)->addText(''); 
-            $table->addCell(2000)->addText($facultyCredit); 
-            $table->addCell(2000)->addText($allowableUnit); 
-            $table->addCell(2000)->addText($totalOverload); 
         }
     }
 
     $footer = $section->addFooter();
     $footer->addImage('../template/footer.png', ['width' => 450, 'height' => 80, 'align' => 'right']);
-
+    
     $section->addText('Respectfully yours,');
+    
     $textRun = $section->addTextRun();
-
+    
     $textRun->addImage('../template/signature.png', [
-        'width' => 50, 
-        'height' => 30,
-        'align' => 'baseline',
+        'width' => 120,
+        'height' => 50, 
+        'wrappingStyle' => 'behind', 
+        'positioning' => 'absolute', 
+        'posHorizontal' => 'absolute',
+        'posHorizontalRel' => 'margin',
+        'posVertical' => 'absolute',
+        'posVerticalRel' => 'line',
     ]);
-
+    
     $textRun->addText('JUNAR A. LANDICHO, PhD', ['bold' => true]);
-
     $section->addText('Dean, CITC', ['bold' => true]);
     $section->addText('Noted by:');
     $section->addText('JUDY ANN T. UGAY, RPm', ['bold' => true]);

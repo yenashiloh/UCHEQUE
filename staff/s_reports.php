@@ -26,27 +26,33 @@ include('./includes/topbar.php');
                 </div>
 
                 <div class="form-group">
-                    <label for="employee" class="form-label">Select Employee <span style="color:red;">*</span></label>
-                    <select class="form-control" id="employee" name="employee_id[]" required>
-                     <option value="" selected>Select Faculty</option>
+                    <label class="form-label">Select Employee(s) <span style="color:red;">*</span></label>
+                    <div class="checkbox-container" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px;">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="selectAll" onclick="toggleAll()">
+                            <label class="form-check-label" for="selectAll">Select All</label>
+                        </div>
                         <?php
                         $query = "SELECT employee.userId, employee.firstName, employee.middleName, employee.lastName 
-                                  FROM employee 
-                                  INNER JOIN employee_role ON employee.userId = employee_role.userId
-                                  WHERE employee_role.role_id = 2";
+                                FROM employee 
+                                INNER JOIN employee_role ON employee.userId = employee_role.userId
+                                WHERE employee_role.role_id = 2
+                                ORDER BY employee.lastName, employee.firstName";
                         $result = $con->query($query);
 
                         if ($result->num_rows > 0) {
                             while ($row = $result->fetch_assoc()) {
-                                $fullName = $row['firstName'] . ' ' . $row['middleName'] . ' ' . $row['lastName'];
-                                echo "<option value='" . $row['userId'] . "'>" . htmlspecialchars($fullName) . "</option>";
+                                $fullName = $row['lastName'] . ', ' . $row['firstName'] . ' ' . $row['middleName'];
+                                echo '<div class="form-check">';
+                                echo '<input class="form-check-input employee-checkbox" type="checkbox" name="employee_id[]" value="' . $row['userId'] . '" id="employee_' . $row['userId'] . '">';
+                                echo '<label class="form-check-label" for="employee_' . $row['userId'] . '">' . htmlspecialchars($fullName) . '</label>';
+                                echo '</div>';
                             }
                         } else {
-                            echo "<option value=''>No users found</option>";
+                            echo "<p>No users found</p>";
                         }
                         ?>
-                    </select>
-                </div>
+                    </div>
         
                     <div class="form-group">
                         <label for="semester" class="form-label">Select Semester <span style="color:red;">*</span></label>
@@ -119,45 +125,25 @@ include('./includes/footer.php');
 ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
 
-<!-- <script>
-    const requestTypeSelect = document.getElementById('request_type');
-    const startingMonthSelect = document.getElementById('starting_month');
-    const endMonthSelect = document.getElementById('end_month');
-
-    // Handle the request type change
-    requestTypeSelect.addEventListener('change', function() {
-        if (requestTypeSelect.value === 'Request for CTO') {
-            startingMonthSelect.disabled = true;
-            endMonthSelect.disabled = true;
-        } else {
-            startingMonthSelect.disabled = false;
-            endMonthSelect.disabled = false;
+<script>
+    function toggleAll() {
+        const selectAllCheckbox = document.getElementById('selectAll');
+        const employeeCheckboxes = document.getElementsByClassName('employee-checkbox');
+        
+        for (let checkbox of employeeCheckboxes) {
+            checkbox.checked = selectAllCheckbox.checked;
         }
-    });
-
-    // Handle the starting month change
-    startingMonthSelect.addEventListener('change', function() {
-        const startMonthIndex = months.indexOf(startingMonthSelect.value);
-
-        // If a starting month is selected, enable end month and set validation
-        if (startMonthIndex >= 0) {
-            endMonthSelect.disabled = false;
-            validateEndMonth(startMonthIndex);
-        }
-    });
-
-    // Ensure the end month is after the starting month
-    function validateEndMonth(startMonthIndex) {
-        endMonthSelect.addEventListener('change', function() {
-            const endMonthIndex = months.indexOf(endMonthSelect.value);
-
-            if (endMonthIndex < startMonthIndex) {
-                alert('End month must be after the start month.');
-                endMonthSelect.value = '';  // Clear the end month
-            }
-        });
     }
 
-    // Array of months for easier validation
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-</script> -->
+    document.addEventListener('DOMContentLoaded', function() {
+        const employeeCheckboxes = document.getElementsByClassName('employee-checkbox');
+        const selectAllCheckbox = document.getElementById('selectAll');
+        
+        for (let checkbox of employeeCheckboxes) {
+            checkbox.addEventListener('change', function() {
+                const allChecked = Array.from(employeeCheckboxes).every(cb => cb.checked);
+                selectAllCheckbox.checked = allChecked;
+            });
+        }
+    });
+</script>

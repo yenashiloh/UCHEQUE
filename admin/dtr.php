@@ -14,7 +14,7 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     $stmt->bind_param("i", $id);
 
     if ($stmt->execute()) {
-        header("Location: dtr.php?deleted=true");
+        header("Location: s_dtr.php?deleted=true");
         exit();
     } else {
         echo "Error deleting record: " . $stmt->error;
@@ -101,7 +101,7 @@ include('./includes/topbar.php');
             $order = isset($_GET['order']) ? $_GET['order'] : 'asc';
 
             $maxHours = 40; // REGULAR HRS
-            $creditThreshold = 12; 
+            $creditThreshold = 12;  // MAXIMUM ALLOWED POLICY
             
             $query = "SELECT d.id, d.userId, d.academic_year_id, d.semester_id, 
                 d.week1, d.week2, d.week3, d.week4, d.week5, d.overall_total, 
@@ -165,7 +165,7 @@ include('./includes/topbar.php');
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Employee ID</th>
+                        <th>No.</th>
                         <th> Name
                             <a href="?sort=name&order=asc" class="sort-arrow <?php echo $sort === 'name' && $order === 'asc' ? 'active' : ''; ?>">▲</a>
                             <a href="?sort=name&order=desc" class="sort-arrow <?php echo $sort === 'name' && $order === 'desc' ? 'active' : ''; ?>">▼</a>
@@ -184,13 +184,12 @@ include('./includes/topbar.php');
                         <th>Week 2</th>
                         <th>Week 3</th>
                         <th>Week 4</th>
-                        <th>Total Credits</th>
+                        <th>SC/CTO</th>
                         <th>Overload</th> 
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                <?php if ($result->num_rows > 0): ?>
                     <?php while ($row = $result->fetch_assoc()):
                         $weeks = [                        //WEEK HRS
                             'week1' => $row['week1'],
@@ -246,7 +245,7 @@ include('./includes/topbar.php');
                     ?>
 
                     <tr>
-                        <td><?php echo htmlspecialchars($row['employeeId']); ?></td>
+                        <td><?php echo htmlspecialchars($row['userId']); ?></td>
                         <td><?php echo htmlspecialchars($row['firstName'] . ' ' . $row['middleName'] . ' ' . $row['lastName']); ?></td>
                         <td><?php echo htmlspecialchars($row['designated']); ?></td>
                         <td><?php echo htmlspecialchars($row['semester_name'] . ' ' . $row['academic_year']); ?></td>
@@ -255,25 +254,41 @@ include('./includes/topbar.php');
                         <td>
                             <strong>OL:</strong> <br>
                             <?php echo htmlspecialchars($row['week1_overload']); ?> <br>
-                            <strong>SC/CTO:</strong> <br>
+                            <strong>
+                                <?php 
+                                    echo ($row['designated'] == 'Designated') ? 'SC:' : 'CTO:';
+                                ?>
+                            </strong>
                             <?php echo htmlspecialchars($totalCreditsPerWeek['week1_overload']); ?>
                         </td>
                         <td>
                             <strong>OL:</strong> <br>
                             <?php echo htmlspecialchars($row['week2_overload']); ?> <br>
-                            <strong>SC/CTO:</strong> <br>
+                            <strong>
+                                <?php 
+                                    echo ($row['designated'] == 'Designated') ? 'SC:' : 'CTO:';
+                                ?>
+                            </strong>
                             <?php echo htmlspecialchars($totalCreditsPerWeek['week2_overload']); ?>
                         </td>
                         <td>
                             <strong>OL:</strong> <br>
                             <?php echo htmlspecialchars($row['week3_overload']); ?> <br>
-                            <strong>SC/CTO:</strong> <br>
+                            <strong>
+                                <?php 
+                                    echo ($row['designated'] == 'Designated') ? 'SC:' : 'CTO:';
+                                ?>
+                            </strong>
                             <?php echo htmlspecialchars($totalCreditsPerWeek['week3_overload']); ?>
                         </td>
                         <td>
                             <strong>OL:</strong> <br>
                             <?php echo htmlspecialchars($row['week4_overload']); ?> <br>
-                            <strong>SC/CTO:</strong> <br>
+                            <strong>
+                                <?php 
+                                    echo ($row['designated'] == 'Designated') ? 'SC:' : 'CTO:';
+                                ?>
+                            </strong>
                             <?php echo htmlspecialchars($totalCreditsPerWeek['week4_overload']); ?>
                         </td>
                         <td>
@@ -288,11 +303,6 @@ include('./includes/topbar.php');
                         </td>
                     </tr>
                     <?php endwhile; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="13" style="text-align:center;">No records found</td>
-                        </tr>
-                    <?php endif; ?>
                 </tbody>
             </table>
 
@@ -422,7 +432,7 @@ include('./includes/footer.php');
             confirmButtonText: 'Yes, delete it!',
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = "dtr.php?id=" + id;
+                window.location.href = "s_dtr.php?id=" + id;
             }
         });
     }

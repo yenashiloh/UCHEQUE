@@ -1,11 +1,11 @@
 <?php
-    require '../config/config.php';
+require '../config/config.php';
 session_start();
 
-if (isset($_GET['userId']) && !empty($_GET['userId'])) {
-    $id = $_GET['userId'];
+if (isset($_GET['id']) && !empty($_GET['id'])) {
+    $id = $_GET['id'];
 
-    $sql = "DELETE FROM itl_extracted_data WHERE userId = ?";
+    $sql = "DELETE FROM itl_extracted_data WHERE id = ?";
     $stmt = $con->prepare($sql);
     $stmt->bind_param('i', $id);
 
@@ -20,5 +20,4 @@ if (isset($_GET['userId']) && !empty($_GET['userId'])) {
     header("Location: ../itl.php?deleted=false");
     exit();
 }
-
 ?>

@@ -136,7 +136,7 @@ include('./includes/topbar.php');
 
                 $sql = "
                     SELECT employee.employeeId, employee.firstName, employee.middleName, employee.lastName, 
-                        itl_extracted_data.userId, itl_extracted_data.totalOverload, 
+                         itl_extracted_data.id, itl_extracted_data.userId, itl_extracted_data.totalOverload, 
                         itl_extracted_data.designated, academic_years.academic_year, semesters.semester_name, 
                         itl_extracted_data.filePath
                     FROM employee
@@ -183,12 +183,11 @@ include('./includes/topbar.php');
                                 <td>" . htmlspecialchars($row['semester_name']) . "</td>
                                 <td>$totalOverload</td>
                                 <td>
-                                    <a href='$downloadLink' class='action download-link' download $downloadDisabled title='Download the file'>Download</a>
-                                    <a href='controller/delete-itl.php?userId=" . $row['userId'] . "' 
-                                    onclick=\"return confirm('Are you sure you want to delete the record for $fullName? This action cannot be undone.');\" 
-                                    class='action delete-link' delete  $deleteDisabled title='Delete this record' style='color: red;' >
-                                    <i class='bx bxs-trash'></i> Delete
-                                    </a>
+                                    <a href='" . $downloadLink . "' class='action download-link' download " . $downloadDisabled . " title='Download the file'>Download</a>
+                                    <a href='controller/delete-itl.php?id=" . $row['id'] . "' 
+                                    onclick=\"return confirm('Are you sure you want to delete the record for " . $fullName . "? This action cannot be undone.');\" 
+                                    class='action delete-link' delete " . $deleteDisabled . " 
+                                    title='Delete this record' style='color: red;'>Delete</a>
                                 </td>
                             </tr>";
                     }

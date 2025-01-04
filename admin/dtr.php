@@ -14,7 +14,7 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     $stmt->bind_param("i", $id);
 
     if ($stmt->execute()) {
-        header("Location: s_dtr.php?deleted=true");
+        header("Location: dtr.php?deleted=true");
         exit();
     } else {
         echo "Error deleting record: " . $stmt->error;
@@ -93,75 +93,73 @@ include('./includes/topbar.php');
         </div>
         <div class="table-container">
             <?php
-            $search_user = isset($_GET['search_user']) ? $_GET['search_user'] : '';
-            $academic_year = isset($_GET['academic_year']) ? $_GET['academic_year'] : '';
-            $semester = isset($_GET['semester']) ? $_GET['semester'] : '';
+                $search_user = isset($_GET['search_user']) ? $_GET['search_user'] : '';
+                $academic_year = isset($_GET['academic_year']) ? $_GET['academic_year'] : '';
+                $semester = isset($_GET['semester']) ? $_GET['semester'] : '';
 
-            $sort = isset($_GET['sort']) ? $_GET['sort'] : 'name'; 
-            $order = isset($_GET['order']) ? $_GET['order'] : 'asc';
+                $sort = isset($_GET['sort']) ? $_GET['sort'] : 'name'; 
+                $order = isset($_GET['order']) ? $_GET['order'] : 'asc';
 
-            $maxHours = 40; // REGULAR HRS
-            $creditThreshold = 12;  // MAXIMUM ALLOWED POLICY
-            
-            $query = "SELECT d.id, d.userId, d.academic_year_id, d.semester_id, 
-                d.week1, d.week2, d.week3, d.week4, d.week5, d.overall_total, 
-                d.filePath, d.month_year, 
-                e.firstName, e.middleName, e.lastName, e.employeeId,
-                a.academic_year, s.semester_name, 
-                COALESCE(itl.totalOverload, 0) AS totalOverload,
-                itl.designated,
-                d.week1_overload, d.week2_overload, d.week3_overload, d.week4_overload
-            FROM dtr_extracted_data d
-            JOIN employee e ON d.userId = e.userId
-            JOIN academic_years a ON d.academic_year_id = a.academic_year_id
-            JOIN semesters s ON d.semester_id = s.semester_id
-            LEFT JOIN itl_extracted_data itl ON d.userId = itl.userId
-            WHERE 1=1";
+                $maxHours = 40; // REGULAR HRS
+                $creditThreshold = 12;  // MAXIMUM ALLOWED POLICY
+                
+                $query = "SELECT DISTINCT d.id, d.userId, d.academic_year_id, d.semester_id, 
+                    d.week1, d.week2, d.week3, d.week4, d.week5, d.overall_total, 
+                    d.filePath, d.month_year, 
+                    e.firstName, e.middleName, e.lastName, e.employeeId,
+                    a.academic_year, s.semester_name, 
+                    COALESCE(itl.totalOverload, 0) AS totalOverload,
+                    itl.designated,
+                    d.week1_overload, d.week2_overload, d.week3_overload, d.week4_overload
+                FROM dtr_extracted_data d
+                JOIN employee e ON d.userId = e.userId
+                JOIN academic_years a ON d.academic_year_id = a.academic_year_id
+                JOIN semesters s ON d.semester_id = s.semester_id
+                LEFT JOIN itl_extracted_data itl ON d.userId = itl.userId AND 
+                    itl.academic_year_id = d.academic_year_id AND 
+                    itl.semester_id = d.semester_id
+                WHERE 1=1";
 
-            if (!empty($search_user)) {
-                $search_user = $con->real_escape_string($search_user);
-                $query .= " AND (e.firstName LIKE '%$search_user%' 
-                                OR e.middleName LIKE '%$search_user%' 
-                                OR e.lastName LIKE '%$search_user%' 
-                                OR e.employeeId LIKE '%$search_user%')";
-            }
+                if (!empty($search_user)) {
+                    $search_user = $con->real_escape_string($search_user);
+                    $query .= " AND (e.firstName LIKE '%$search_user%' 
+                                    OR e.middleName LIKE '%$search_user%' 
+                                    OR e.lastName LIKE '%$search_user%' 
+                                    OR e.employeeId LIKE '%$search_user%')";
+                }
 
-            if (!empty($academic_year)) {
-                $query .= " AND d.academic_year_id = $academic_year";
-            }
+                if (!empty($academic_year)) {
+                    $query .= " AND d.academic_year_id = $academic_year";
+                }
 
-            if (!empty($semester)) {
-                $query .= " AND d.semester_id = $semester";
-            }
+                if (!empty($semester)) {
+                    $query .= " AND d.semester_id = $semester";
+                }
 
-            $result = $con->query($query);
+                $query .= " GROUP BY d.id"; 
 
-            if (!$result) {
-                die("Error fetching data: " . $con->error);
-            }
+                $query .= " ORDER BY ";
 
-            $query .= " ORDER BY ";
+                switch ($sort) {
+                    case 'name':
+                        $query .= "e.firstName " . $order . ", e.middleName " . $order . ", e.lastName " . $order;
+                        break;
+                    case 'totalOverload':
+                        $query .= "COALESCE(itl.totalOverload, 0) " . $order;
+                        break;
+                    case 'designated':
+                        $query .= "itl.designated " . $order;
+                        break;
+                    default:
+                        $query .= "e.firstName " . $order;
+                }
 
-            switch ($sort) {
-                case 'name':
-                    $query .= "e.firstName " . $order . ", e.middleName " . $order . ", e.lastName " . $order;
-                    break;
-                case 'totalOverload':
-                    $query .= "COALESCE(itl.totalOverload, 0) " . $order;
-                    break;
-                case 'designated':
-                    $query .= "itl.designated " . $order;
-                    break;
-                default:
-                    $query .= "e.firstName " . $order;
-            }
                 $result = $con->query($query);
 
                 if (!$result) {
                     die("Error fetching data: " . $con->error);
                 }
             ?>
-
             <table class="table">
                 <thead>
                     <tr>
@@ -432,7 +430,7 @@ include('./includes/footer.php');
             confirmButtonText: 'Yes, delete it!',
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = "s_dtr.php?id=" + id;
+                window.location.href = "dtr.php?id=" + id;
             }
         });
     }

@@ -100,66 +100,84 @@ include('./includes/topbar.php');
                 $sort = isset($_GET['sort']) ? $_GET['sort'] : 'name'; 
                 $order = isset($_GET['order']) ? $_GET['order'] : 'asc';
 
-                $maxHours = 40; // REGULAR HRS
-                $creditThreshold = 12;  // MAXIMUM ALLOWED POLICY
-                
-                $query = "SELECT DISTINCT d.id, d.userId, d.academic_year_id, d.semester_id, 
-                    d.week1, d.week2, d.week3, d.week4, d.week5, d.overall_total, 
-                    d.filePath, d.month_year, 
-                    e.firstName, e.middleName, e.lastName, e.employeeId,
-                    a.academic_year, s.semester_name, 
-                    COALESCE(itl.totalOverload, 0) AS totalOverload,
-                    itl.designated,
-                    d.week1_overload, d.week2_overload, d.week3_overload, d.week4_overload
-                FROM dtr_extracted_data d
-                JOIN employee e ON d.userId = e.userId
-                JOIN academic_years a ON d.academic_year_id = a.academic_year_id
-                JOIN semesters s ON d.semester_id = s.semester_id
-                LEFT JOIN itl_extracted_data itl ON d.userId = itl.userId AND 
-                    itl.academic_year_id = d.academic_year_id AND 
-                    itl.semester_id = d.semester_id
-                WHERE 1=1";
+                $maxHours = 40;
+                $creditThreshold = 12;
 
-                if (!empty($search_user)) {
-                    $search_user = $con->real_escape_string($search_user);
-                    $query .= " AND (e.firstName LIKE '%$search_user%' 
+                $query = "SELECT DISTINCT 
+                itl.id as itl_id,
+                e.userId,
+                e.firstName, 
+                e.middleName, 
+                e.lastName, 
+                e.employeeId,
+                itl.designated,
+                itl.totalOverload,
+                itl.academic_year_id as itl_academic_year_id,
+                itl.semester_id as itl_semester_id,
+                d.id as dtr_id,
+                d.academic_year_id,
+                d.semester_id,
+                d.week1, 
+                d.week2, 
+                d.week3, 
+                d.week4, 
+                d.week5,
+                d.filePath,
+                d.month_year,
+                d.week1_overload, 
+                d.week2_overload, 
+                d.week3_overload, 
+                d.week4_overload,
+                a.academic_year,
+                s.semester_name
+                    FROM itl_extracted_data itl
+                    JOIN employee e ON itl.userId = e.userId 
+                    LEFT JOIN dtr_extracted_data d ON e.userId = d.userId AND (
+                        (itl.semester_id = 1 AND d.semester_id = 1) OR 
+                        (itl.semester_id = 2 AND d.semester_id = 2)
+                    )
+                    LEFT JOIN academic_years a ON d.academic_year_id = a.academic_year_id
+                    LEFT JOIN semesters s ON d.semester_id = s.semester_id
+                    WHERE 1=1";
+                    
+                    if (!empty($search_user)) {
+                        $search_user = $con->real_escape_string($search_user);
+                        $query .= " AND (e.firstName LIKE '%$search_user%' 
                                     OR e.middleName LIKE '%$search_user%' 
                                     OR e.lastName LIKE '%$search_user%' 
                                     OR e.employeeId LIKE '%$search_user%')";
-                }
+                    }
+                    
+                    if (!empty($academic_year)) {
+                        $query .= " AND d.academic_year_id = $academic_year";
+                    }
+                    
+                    if (!empty($semester)) {
+                        $query .= " AND d.semester_id = $semester";
+                    }
+                    
+                    $query .= " GROUP BY itl.id, d.id";
+                    
+                    switch ($sort) {
+                        case 'name':
+                            $query .= " ORDER BY e.firstName " . $order . ", e.middleName " . $order . ", e.lastName " . $order;
+                            break;
+                        case 'totalOverload':
+                            $query .= " ORDER BY itl.totalOverload " . $order;
+                            break;
+                        case 'designated':
+                            $query .= " ORDER BY itl.designated " . $order;
+                            break;
+                        default:
+                            $query .= " ORDER BY e.firstName " . $order;
+                    }
 
-                if (!empty($academic_year)) {
-                    $query .= " AND d.academic_year_id = $academic_year";
-                }
+                    $result = $con->query($query);
 
-                if (!empty($semester)) {
-                    $query .= " AND d.semester_id = $semester";
-                }
-
-                $query .= " GROUP BY d.id"; 
-
-                $query .= " ORDER BY ";
-
-                switch ($sort) {
-                    case 'name':
-                        $query .= "e.firstName " . $order . ", e.middleName " . $order . ", e.lastName " . $order;
-                        break;
-                    case 'totalOverload':
-                        $query .= "COALESCE(itl.totalOverload, 0) " . $order;
-                        break;
-                    case 'designated':
-                        $query .= "itl.designated " . $order;
-                        break;
-                    default:
-                        $query .= "e.firstName " . $order;
-                }
-
-                $result = $con->query($query);
-
-                if (!$result) {
-                    die("Error fetching data: " . $con->error);
-                }
-            ?>
+                    if (!$result) {
+                        die("Error fetching data: " . $con->error);
+                    }
+                ?>
             <table class="table">
                 <thead>
                     <tr>
@@ -297,7 +315,7 @@ include('./includes/topbar.php');
                         </td>
                         <td>
                             <a href="<?php echo htmlspecialchars('/UCheque/uploads/' . $row['filePath']); ?>" download>Download</a>
-                            <a href="#" onclick="confirmDelete(<?php echo htmlspecialchars($row['id']); ?>)">Delete</a>
+                            <a href="#" onclick="confirmDelete(<?php echo htmlspecialchars($row['dtr_id']); ?>)">Delete</a>
                         </td>
                     </tr>
                     <?php endwhile; ?>

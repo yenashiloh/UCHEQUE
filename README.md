@@ -7,11 +7,8 @@
 <p>Built with modern web technologies and designed for multi-user access, UCheque serves as a centralized platform that enhances transparency, reduces administrative burden, and ensures accurate compensation for faculty members while providing administrators with comprehensive oversight and reporting capabilities.</p>
 
 <div align="center">
-  <img src="https://via.placeholder.com/800x400/2c3e50/ffffff?text=UCheque+Admin+Dashboard" alt="Admin Dashboard" width="800">
-  <img src="https://via.placeholder.com/800x400/3498db/ffffff?text=Faculty+Overload+Management" alt="Overload Management" width="800">
-  <img src="https://via.placeholder.com/800x400/e74c3c/ffffff?text=DTR+Tracking+System" alt="DTR System" width="800">
-  <img src="https://via.placeholder.com/800x400/27ae60/ffffff?text=Reports+and+Analytics" alt="Reports Dashboard" width="800">
-
+  <img src="https://github.com/yenashiloh/UCHEQUE/blob/main/assets/Screenshot%202025-08-19%20170929.png" alt="Dashboard" width="800">
+  <img src="https://github.com/yenashiloh/UCHEQUE/blob/main/assets/Screenshot%202025-08-19%20170955.png" alt="Overload Management" width="800">
   <br><br>
 </div>
 

@@ -189,29 +189,6 @@
     <li>Personal ITL and DTR viewing capabilities</li>
 </ul>
 
-<h2>📊 <strong>SYSTEM CAPABILITIES</strong></h2>
-<br>
-
-<p>The UCheque system provides comprehensive management across all aspects of faculty administration:</p>
-<ul>
-    <li><strong>User Base Management</strong>: Unlimited faculty and staff accounts</li>
-    <li><strong>Overload Processing</strong>: Automated calculation and approval workflows</li>
-    <li><strong>DTR Integration</strong>: Seamless biometric system integration</li>
-    <li><strong>ITL Tracking</strong>: Complete academic load monitoring</li>
-    <li><strong>Report Generation</strong>: 20+ pre-built report templates</li>
-    <li><strong>Data Import/Export</strong>: Bulk operations for efficiency</li>
-</ul>
-
-<h3>Administrative Features</h3>
-<ul>
-    <li><strong>Multi-Department Support</strong>: Unlimited department and college management</li>
-    <li><strong>Semester Management</strong>: Academic term configuration and tracking</li>
-    <li><strong>Budget Monitoring</strong>: Overload budget allocation and utilization</li>
-    <li><strong>Approval Workflows</strong>: Customizable multi-level approval processes</li>
-    <li><strong>Audit Trails</strong>: Complete system activity logging</li>
-    <li><strong>Backup and Recovery</strong>: Automated data backup systems</li>
-</ul>
-
 <h2>🛠 <strong>TECHNOLOGY STACK</strong></h2>
 
 <h3>Frontend Technologies</h3>

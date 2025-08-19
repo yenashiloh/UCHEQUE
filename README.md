@@ -214,9 +214,6 @@
     <li><strong>Administrators</strong> - Educational institution administrators with full system access and management capabilities</li>
     <li><strong>HR Staff</strong> - Human resources personnel managing faculty records, payroll, and administrative processes</li>
     <li><strong>Faculty Members</strong> - Teaching staff submitting overload requests, DTR corrections, and accessing personal records</li>
-    <li><strong>Department Heads</strong> - Academic leaders monitoring departmental workload distribution</li>
-    <li><strong>Payroll Officers</strong> - Staff responsible for processing faculty compensation</li>
-    <li><strong>Academic Affairs</strong> - Personnel managing academic scheduling and faculty assignments</li>
 </ul>
 
 <h2>📈 <strong>SYSTEM WORKFLOWS</strong></h2>

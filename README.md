@@ -83,11 +83,6 @@
             <li><strong>Profile Management</strong>: Complete user profile maintenance</li>
         </ul>
     </li>
-    <li>Role assignment and permission management</li>
-    <li>Department and position categorization</li>
-    <li>Employee status tracking (active, inactive, on-leave)</li>
-    <li>Contact information and emergency details management</li>
-    <li>User activity logging and audit trails</li>
 </ul>
 
 <h3>4. Overload Request Management</h3>

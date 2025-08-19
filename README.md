@@ -216,19 +216,6 @@
     <li><strong>Faculty Members</strong> - Teaching staff submitting overload requests, DTR corrections, and accessing personal records</li>
 </ul>
 
-<h2>📈 <strong>SYSTEM WORKFLOWS</strong></h2>
-<br>
-
-<h3>Overload Request Process</h3>
-<ul>
-    <li><strong>Step 1</strong>: Faculty submits overload request through self-service portal</li>
-    <li><strong>Step 2</strong>: System validates request against current ITL and availability</li>
-    <li><strong>Step 3</strong>: Department head reviews and provides initial approval</li>
-    <li><strong>Step 4</strong>: HR staff verifies budget availability and compliance</li>
-    <li><strong>Step 5</strong>: Administrator provides final approval</li>
-    <li><strong>Step 6</strong>: System updates ITL and generates compensation calculations</li>
-</ul>
-
 <h2>🔒 <strong>SECURITY FEATURES</strong></h2>
 <br>
 

@@ -230,24 +230,10 @@
     <li><strong>Access Monitoring</strong> - Real-time security monitoring and alerts</li>
 </ul>
 
-<h2>📋 <strong>INSTALLATION & SETUP</strong></h2>
-<br>
-
-<h3>System Requirements</h3>
-<ul>
-    <li>Web server (Apache 2.4+ or Nginx)</li>
-    <li>PHP 7.4 or higher</li>
-    <li>MySQL 5.7 or higher</li>
-    <li>Minimum 2GB RAM</li>
-    <li>50GB available disk space</li>
-    <li>SSL certificate for secure connections</li>
-</ul>
-
-
 <h2>📄 <strong>LICENSE</strong></h2>
 <br>
 
-<p>This project is licensed under the MIT License - see the <a href="LICENSE.md">LICENSE</a> file for details.</p>
+<p>This project is licensed under the MIT License - see the <a href="https://github.com/yenashiloh/UCHEQUE/blob/main/LICENSE.md">LICENSE</a> file for details.</p>
 <br>
 
 <hr>

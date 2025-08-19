@@ -207,16 +207,6 @@
     <li><strong>Apache/Nginx</strong> - Web server configuration</li>
 </ul>
 
-<h3>Additional Features</h3>
-<ul>
-    <li><strong>File Processing</strong> - CSV/Excel import and export capabilities</li>
-    <li><strong>PDF Generation</strong> - Report generation and document creation</li>
-    <li><strong>Email Integration</strong> - Automated notifications and communications</li>
-    <li><strong>Session Management</strong> - Secure authentication and authorization</li>
-    <li><strong>Data Validation</strong> - Client and server-side validation</li>
-    <li><strong>Responsive Design</strong> - Mobile-friendly interface</li>
-</ul>
-
 <h2>👥 <strong>TARGET USERS</strong></h2>
 <br>
 
